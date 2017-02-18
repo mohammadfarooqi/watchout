@@ -1,5 +1,3 @@
-// start slingin' some d3 here.
-
 var gameOptions = {
   height: 450,
   width: 700,
@@ -9,7 +7,8 @@ var gameOptions = {
 
 var gameStats = {
   score: 0,
-  bestScore: 0
+  bestScore: 0,
+  collision: 0
 };
 
 var axes = {
@@ -22,14 +21,18 @@ var gameBoard = d3.select('.board').append('svg:svg')
                   .attr('height', gameOptions.height);
 
 var updateScore = function() {
-  d3.select('.current')
+  d3.select('.current span')
     .text(gameStats.score.toString());
 };
 
 var updateBestScore = function() {
   gameStats.bestScore = _.max([gameStats.bestScore, gameStats.score]);
 
-  d3.select('.highscore').text(gameStats.bestScore.toString());
+  d3.select('.highscore span').text(gameStats.bestScore.toString());
+};
+
+var updateCollision = function() {
+  d3.select('.collision span').text(gameStats.collision.toString());
 };
 
 var Player = function(gameOptions) {
@@ -104,8 +107,6 @@ Player.prototype.transform = function(options) {
   var y = options.y || this.y;
   this.setY(y);
 
-  //`rotate(${this.angle},${this.getX()},${this.getY()})translate(${this.getX()},${this.getY()})`
-
   this.el.attr('transform', 'rotate(' + this.angle + ',' + this.getX() + ', ' + this.getY() + ') translate(' + this.getX() + ', ' + this.getY() + ')');
 };
 
@@ -118,7 +119,6 @@ Player.prototype.moveAbsolute = function(x, y) {
 };
 
 Player.prototype.moveRelative = function(dx, dy) {
-//  debugger;
   this.transform({
     x: this.getX() + dx,
     y: this.getY() + dy,
@@ -139,9 +139,8 @@ Player.prototype.setupDragging = function() {
 
 var players = [];
 players.push(new Player(gameOptions).render(gameBoard));
-//players.push(new Player(gameOptions).render(gameBoard));
 
-console.log(players);
+// console.log(players);
 
 var createEnemies = function() {
   return _.range(0, gameOptions.numEnemies)
@@ -160,18 +159,19 @@ var render = function(enemyData) {
                             return d.id;
                           });
 
+
   enemies.enter()
-    .append('svg:circle')
-    .attr({
-      class: 'enemy',
-      cx: function(enemy) {
-        return axes.x(enemy.x);
-      },
-      cy: function(enemy) {
-        return axes.y(enemy.y);
-      },
-      r: 0
-    });
+  .append('svg:circle')
+  .attr({
+    class: 'enemy',
+    cx: function(enemy) {
+      return axes.x(enemy.x);
+    },
+    cy: function(enemy) {
+      return axes.y(enemy.y);
+    },
+    r: 0
+  });
 
   enemies.exit().remove();
 
@@ -194,6 +194,8 @@ var render = function(enemyData) {
     updateBestScore();
     gameStats.score = 0;
     updateScore();
+    gameStats.collision += 1;
+    updateCollision();
   };
 
   var tweenWithCollisionDetection = function(endData) {
