@@ -1,6 +1,6 @@
 var gameOptions = {
-  height: 450,
-  width: 700,
+  width: window.innerWidth * 0.8,
+  height: window.innerHeight * 0.7,
   numEnemies: 30,
   padding: 20
 };
@@ -36,7 +36,7 @@ var updateCollision = function() {
 };
 
 var Player = function(gameOptions) {
-  this.path = 'm-7.5,1.62413c0,-5.04095 4.08318,-9.12413 9.12414,-9.12413c5.04096,0 9.70345,5.53145 11.87586,9.12413c-2.02759,2.72372 -6.8349,9.12415 -11.87586,9.12415c-5.04096,0 -9.12414,-4.08318 -9.12414,-9.12415z';
+  this.path = 'M44.61,19.19H39l-5.32-8.11L33.59,11c-.05-.05-.05-.11-.11-.16s-.11-.16-.22-.22-.11-.05-.16-.11-.16-.11-.22-.16-.11-.05-.16-.11-.16-.05-.27-.11-10.3-2.79-10.3-2.79a2.24,2.24,0,0,0-1.86.33l-7.95,5.53a2.25,2.25,0,1,0,2.52,3.73L22,12.07l5.7,1.48c-.49.71-13.59,18.85-13.59,18.85l-9.81.82a2.21,2.21,0,0,0-2,2.41,2.26,2.26,0,0,0,2.25,2h.22l10.74-.93A2.15,2.15,0,0,0,17,35.9l5.48-6.63,7.78,5.32L26.09,46a2.18,2.18,0,0,0,1.37,2.85,1.86,1.86,0,0,0,.77.11,2.17,2.17,0,0,0,2.08-1.48L35.18,34a2.22,2.22,0,0,0-.66-2.47l-5.59-4.66,4.6-7.84,2.36,3.56a2.15,2.15,0,0,0,1.86,1h6.85a2.22,2.22,0,0,0,2.25-2.25A2.18,2.18,0,0,0,44.61,19.19ZM37.54,9.66a4.33,4.33,0,1,0-4.33-4.33A4.3,4.3,0,0,0,37.54,9.66Z';
   this.fill = '#ff6600';
   this.x = 0;
   this.y = 0;
@@ -57,7 +57,7 @@ Player.prototype.render = function(to) {
 
   this.setupDragging();
 
-  return this; // ?? why are returning this
+  return this;
 };
 
 Player.prototype.getX = function() {
@@ -99,7 +99,7 @@ Player.prototype.setY = function(y) {
 };
 
 Player.prototype.transform = function(options) {
-  this.angle = options.angle || this.angle;
+  this.angle = this.angle;
 
   var x = options.x || this.x;
   this.setX(x);
@@ -108,14 +108,6 @@ Player.prototype.transform = function(options) {
   this.setY(y);
 
   this.el.attr('transform', 'rotate(' + this.angle + ',' + this.getX() + ', ' + this.getY() + ') translate(' + this.getX() + ', ' + this.getY() + ')');
-};
-
-// NOTE: might not need this method
-Player.prototype.moveAbsolute = function(x, y) {
-  this.transform({
-    x: x,
-    y: y
-  });
 };
 
 Player.prototype.moveRelative = function(dx, dy) {
@@ -140,8 +132,6 @@ Player.prototype.setupDragging = function() {
 var players = [];
 players.push(new Player(gameOptions).render(gameBoard));
 
-// console.log(players);
-
 var createEnemies = function() {
   return _.range(0, gameOptions.numEnemies)
     .map(function(i) {
@@ -159,7 +149,6 @@ var render = function(enemyData) {
                             return d.id;
                           });
 
-
   enemies.enter()
   .append('svg:circle')
   .attr({
@@ -170,7 +159,8 @@ var render = function(enemyData) {
     cy: function(enemy) {
       return axes.y(enemy.y);
     },
-    r: 0
+    r: 20,
+    fill: 'gray'
   });
 
   enemies.exit().remove();
@@ -196,6 +186,11 @@ var render = function(enemyData) {
     updateScore();
     gameStats.collision += 1;
     updateCollision();
+
+    if (gameStats.collision % 2 === 0) {
+      var mySVG = document.querySelector('svg');
+      mySVG.toggleClass('c');
+    }
   };
 
   var tweenWithCollisionDetection = function(endData) {
@@ -228,7 +223,7 @@ var render = function(enemyData) {
   enemies
     .transition()
       .duration(500)
-      .attr('r', 10)
+      .attr('r', 20)
     .transition()
       .duration(2000)
       .tween('custom', tweenWithCollisionDetection);
@@ -253,3 +248,28 @@ var play = function() {
 };
 
 play();
+
+SVGElement.prototype.hasClass = function (className) {
+  return new RegExp('(\\s|^)' + className + '(\\s|$)').test(this.getAttribute('class'));
+};
+
+SVGElement.prototype.addClass = function (className) {
+  if (!this.hasClass(className)) {
+    this.setAttribute('class', this.getAttribute('class') + ' ' + className);
+  }
+};
+
+SVGElement.prototype.removeClass = function (className) {
+  var removedClass = this.getAttribute('class').replace(new RegExp('(\\s|^)' + className + '(\\s|$)', 'g'), '$2');
+  if (this.hasClass(className)) {
+    this.setAttribute('class', removedClass);
+  }
+};
+
+SVGElement.prototype.toggleClass = function (className) {
+  if (this.hasClass(className)) {
+    this.removeClass(className);
+  } else {
+    this.addClass(className);
+  }
+};

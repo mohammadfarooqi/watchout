@@ -1,14 +1,28 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <title>Watchout</title>
     <link rel="stylesheet" type="text/css" href="styles.css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,900" rel="stylesheet">
   </head>
   <body>
+    <h1>Watchout!</h1>
     <div class="scoreboard">
-      <!-- Modify the scoreboard when important events occur in your game! -->
-      <div class="highscore">High score: <span>0</span></div>
-      <div class="current">Current score: <span>0</span></div>
-      <div class="collision">Collisions: <span>0</span></div>
+      <div class="container">
+        <div class="block">
+          <div class="highscore">High score: <span class="score">0</span></div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="block">
+          <div class="current">Current score: <span class="score">0</span></div>
+        </div>
+      </div>
+      <div class="container">
+        <div class="block">
+          <div class="collision">Collisions: <span class="score">0</span></div>
+        </div>
+      </div>
     </div>
     <div class="board"><div class="mouse"></div></div>
     <script src="lib/d3.js" charset="utf-8"></script>
